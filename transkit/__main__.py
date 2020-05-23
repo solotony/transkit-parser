@@ -219,6 +219,8 @@ def process_transmission(bot, transmission):
         bot.move_to(price_span, 'price_span', scroll=False, randomize=5, ybaseoffset=HEADEROFFSET)
         bot.click_at(price_span, 'price_span')
 
+        input('Ждемс....')
+
     # полюбому перед выходом
     if num_compare >= 1:
         do_compare(bot)
