@@ -209,8 +209,10 @@ def process_transmission(bot, transmission):
         price_span = bot.find(id=part[2])
         bot.move_to(price_span, 'price_span', scroll=False, randomize=5, ybaseoffset=HEADEROFFSET)
         bot.click_at(price_span, 'price_span')
+        price_span = bot.find(xpath='//span[@id="{}"]/span'.format(part[2]))
         price = price_span.get_attribute('innerHTML')
         print('  YAHOO {}:{}'.format(part[0], price))
+
 
     # полюбому перед выходом
     if num_compare >= 1:
