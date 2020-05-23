@@ -16,7 +16,7 @@ class Bot:
 
     def __init__(self, starturl):
         self.starturl = starturl
-        self.driver = webdriver.Firefox()
+        self.driver = webdriver.Chrome() # Firefox()
         self.driver.maximize_window()
         self.driver.get(self.starturl)
 

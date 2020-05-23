@@ -8,14 +8,16 @@ import sys
 from transkit.bot import Bot
 from bs4 import BeautifulSoup
 
-LOGIN = 'login'
-PASSWORD = 'password'
+PROD = 1
+LOGIN = 'arttronic' if PROD else 'login'
+PASSWORD = 'ndef53' if PROD else 'password'
 TEST = 1
+
 NUM_COMPARE_MIN = 3
 NUM_COMPARE_MAX = 5 # максимально - 20
 VIEW_TRESHOLD = 1 # от 0 до 1
 COMPARE_TRESHOLD = 1 # от 0 до 1
-RANDOM_MOVE_TRESHOLD = 0 # от 0 до 1
+RANDOM_MOVE_TRESHOLD = 1
 HEADEROFFSET=-170
 
 #   TRANSMISSIONS = ['CVT2M','DCT-7G (724.0)','DCT250 (DSG)','DCT450 (DSG)','DCT470 (DSG)','DPO, AL4','E-18C','E4N71B','E4OD','F1C1 (CVT)']
