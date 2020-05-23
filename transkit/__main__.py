@@ -16,9 +16,9 @@ TEST = 0 if PROD else 1
 
 NUM_COMPARE_MIN = 3
 NUM_COMPARE_MAX = 5 # максимально - 20
-VIEW_TRESHOLD = 1 # от 0 до 1
-COMPARE_TRESHOLD = 1 # от 0 до 1
-RANDOM_MOVE_TRESHOLD = 1
+VIEW_TRESHOLD = 0.4 # от 0 до 1
+COMPARE_TRESHOLD = 0.3 # от 0 до 1
+RANDOM_MOVE_TRESHOLD = 0.2
 HEADEROFFSET=-170
 
 #   TRANSMISSIONS = ['CVT2M','DCT-7G (724.0)','DCT250 (DSG)','DCT450 (DSG)','DCT470 (DSG)','DPO, AL4','E-18C','E4N71B','E4OD','F1C1 (CVT)']
@@ -29,9 +29,19 @@ def main(args):
 
     bot = Bot('http://www.transkit.ru/')
 
-    process_login(bot)
-    process_transmission(bot, transmission)
+    if bot.find(id='menuIconAccountActiveArea'):
+        print('  INFO уже залогинены')
+    else:
+        print('  INFO надо логиниться')
+        process_login(bot)
+        if bot.find(id='menuIconAccountActiveArea'):
+            print('  INFO залогинены успешно')
+        else:
+            exit('  CRITICAL логин ахтунг!!!!!!!!!!!!')
 
+    input('Ждемс....')
+
+    process_transmission(bot, transmission)
 
 def do_compare(bot):
     print('Выполняется сравнение')
@@ -73,7 +83,6 @@ def do_view(bot, part_name):
 
     return True
 
-
 def process_login(bot):
     print('TEST={}'.format(TEST))
 
@@ -100,17 +109,13 @@ def process_login(bot):
         bot.move_to(login_input, 'login_input', scroll=False, randomize=5)
         bot.send_keys_to(login_input, 'login_input', LOGIN)
 
-        input('ждемс....')
-
         bot.move_to(password_input, 'password_input', scroll=False, randomize=5)
         bot.send_keys_to(password_input, 'password_input', PASSWORD)
-
-        input('ждемс....')
 
         bot.move_to(button_enter, 'button_enter', scroll=False, randomize=5)
         bot.click_at(button_enter, 'button_enter')
 
-        input('ждемс....')
+
 
     return True
 
@@ -128,7 +133,7 @@ def process_transmission(bot, transmission):
     if TEST:
         search_button = bot.find(xpath='//*[@id="pnSearchForm"]/table/tbody/tr/td[2]/input')
     else:
-        exit('пока только тестовый режим')
+        search_button = bot.find(id='pnSearchFormButton')
 
     if not search_button:
         exit('  CRITICAL Не могу кнопку поиска')
@@ -136,11 +141,17 @@ def process_transmission(bot, transmission):
     bot.move_to(search_input, 'search_input', scroll=False, randomize=5)
     bot.send_keys_to(search_input, 'search_input', transmission)
 
+    input('Ждемс....')
+
     bot.move_to(search_button, 'search_button', scroll=False, randomize=5)
     bot.click_at(search_button, 'search_button')
 
+    input('Ждемс....')
+
     view_mode_button = bot.find(xpath='//*[@title="Показать все детали трансмиссии в виде таблицы"]')
     bot.click_at(view_mode_button, 'view_mode_button')
+
+    input('Ждемс....')
 
     soup = bot.create_soup()
     tag_table = soup.find('table', attrs={'id': 'detailstable'})
