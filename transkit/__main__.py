@@ -186,7 +186,7 @@ def process_transmission(bot, transmission):
         if random.random() < RANDOM_MOVE_TRESHOLD:
             bot.move_to_random()
 
-        print('Обрабатываем деталь {} '.format(part[0]))
+        print('Обрабатываем деталь `{}` `{}` `{}`'.format(part[0],part[1],part[2]))
 
         if random.random() <= VIEW_TRESHOLD:
             do_view(bot, part[0])
