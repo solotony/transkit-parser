@@ -39,8 +39,6 @@ def main(args):
         else:
             exit('  CRITICAL логин ахтунг!!!!!!!!!!!!')
 
-    input('Ждемс....')
-
     process_transmission(bot, transmission)
 
 def do_compare(bot):
@@ -141,21 +139,11 @@ def process_transmission(bot, transmission):
     bot.move_to(search_input, 'search_input', scroll=False, randomize=5)
     bot.send_keys_to(search_input, 'search_input', transmission)
 
-    input('Ждемс....')
-
     bot.move_to(search_button, 'search_button', scroll=False, randomize=5)
     bot.click_at(search_button, 'search_button')
 
-    input('Ждемс....')
-
     view_mode_button = bot.find(xpath='//*[@title="Показать все детали трансмиссии в виде таблицы"]')
     bot.click_at(view_mode_button, 'view_mode_button')
-
-    input('Ждемс....')
-
-
-
-
 
     soup = bot.create_soup()
     tag_table = soup.find('table', attrs={'id': 'detailstable'})
@@ -170,9 +158,11 @@ def process_transmission(bot, transmission):
             print('  INFO пропускаем заголовок таблицы')
             continue
 
-        # button class ="emailMe"
+        if tag_tr.find('button', attrs={'class': 'emailMe'}, recursive=True):
+            print('  INFO пропускаем деталь нет в наличии')
+            continue
 
-        articul, cmp_div_id, add_div_id = None, None, None
+        articul, cmp_div_id, cmp_calc_price = None, None, None
         for counter, tag_td in enumerate(tag_tr.findChildren('td', recursive=False)):
             if counter == 1:
                 tag_a = tag_td.find('a')
@@ -182,7 +172,7 @@ def process_transmission(bot, transmission):
                 tag_div = tag_td.find('div')
                 if tag_div:
                     cmp_div_id = tag_div.attrs["id"]
-            if counter == 6:
+            if counter == 7:
                 tag_span = tag_td.find('span', attrs={'class': 'calcPrice'},  recursive=False)
                 if tag_span:
                     cmp_calc_price = tag_span.attrs["id"]
