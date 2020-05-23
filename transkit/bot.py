@@ -1,0 +1,200 @@
+from selenium import webdriver
+from selenium.webdriver.common.keys import Keys
+from selenium.webdriver.common.action_chains import ActionChains
+from selenium.webdriver import ActionChains
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.common.by import By
+from bs4 import BeautifulSoup
+import time
+import random
+
+class Bot:
+
+    RANDOFFSETX = random.randint(10, 15)
+    RANDOFFSETY = random.randint(10, 15)
+
+    def __init__(self, starturl):
+        self.starturl = starturl
+        self.driver = webdriver.Firefox()
+        self.driver.maximize_window()
+        self.driver.get(self.starturl)
+
+
+    def find(self, id=None, name=None, xpath=None, link_text=None, link_text_part=None, tag_name=None):
+        time.sleep(1)
+        try:
+            if id:
+                element = self.driver.find_element_by_id(id)
+                print('  OK element with id="{}"'.format(id))
+                return element
+            if name:
+                element = self.driver.find_element_by_name(name)
+                print('  OK element with name="{}"'.format(name))
+                return element
+            if xpath:
+                element = self.driver.find_element_by_xpath(xpath)
+                print('  OK element with xpath="{}"'.format(xpath))
+                return element
+            if link_text:
+                element = self.driver.find_element_by_link_text(link_text)
+                print('  OK element with link_text="{}"'.format(link_text))
+                return element
+            if link_text_part:
+                element = self.driver.find_element_by_partial_link_text(link_text_part)
+                print('  OK element with link_text_part="{}"'.format(link_text_part))
+                return element
+            if tag_name:
+                element = self.driver.find_element_by_tag_name(tag_name)
+                print('  OK element with tag_name="{}"'.format(tag_name))
+                return element
+            else:
+                print('  ERROR bad find_element params')
+                return None
+        except Exception as e:
+            print('  ERROR find_element failed: {}'.format(str(e)))
+            return None
+
+    def scroll_shim(self, object, ybaseoffset=0):
+        x = object.location['x']
+        y = object.location['y'] + ybaseoffset
+        scroll_by_coord = 'window.scrollTo(%s,%s);' % (
+            x,
+            y
+        )
+        scroll_nav_out_of_way = 'window.scrollBy(0, -120);'
+        self.driver.execute_script(scroll_by_coord)
+        self.driver.execute_script(scroll_nav_out_of_way)
+
+    def move_to(self, element, element_name, scroll=False, randomize=0, ybaseoffset=0):
+        time.sleep(1)
+        try:
+            if scroll:
+                location = element.location_once_scrolled_into_view
+            else:
+                location = element.location
+            print('  INFO location of {} is {}'.format(element_name, str(location)))
+        except Exception as e:
+            print('  ERROR failed to get location of {}: {}'.format(element_name, str(e)))
+            return False
+        if randomize:
+            steps = random.randint(2,randomize)
+            print('  INFO randomize {} steps {}: '.format(randomize, steps), end=' ')
+            for step in reversed(range(1, steps+1)):
+                actions = ActionChains(self.driver)
+                x_offset = random.randint(-step*self.RANDOFFSETX,step*self.RANDOFFSETX)
+                y_offset = random.randint(-step*self.RANDOFFSETY,step*self.RANDOFFSETY)
+                try:
+                    actions.move_to_element_with_offset(element, x_offset, y_offset+ybaseoffset)
+                    actions.pause(random.random())
+                    actions.perform()
+                    print('+({},{})'.format(x_offset, y_offset), end=' ')
+                except Exception as e:
+                    print('x({},{})'.format(x_offset, y_offset), end=' ')
+            print()
+        try:
+            actions = ActionChains(self.driver)
+            actions.move_to_element_with_offset(element, 0, ybaseoffset)
+            actions.pause(random.random())
+            actions.perform()
+            print('  OK moved to {}'.format(element_name))
+            return True
+        except Exception as e:
+            print('  retry with scroll'.format(element_name, str(e)))
+
+        self.scroll_shim(element)
+
+        try:
+            actions = ActionChains(self.driver)
+            actions.move_to_element(element)
+            actions.pause(random.random())
+            actions.perform()
+            print('  OK moved (with scrioll) to {}'.format(element_name))
+            return True
+        except Exception as e:
+            print('  ERROR failed to move to {}: {}'.format(element_name, str(e)))
+            return False
+
+    def click_at(self, element, element_name):
+        time.sleep(1)
+        try:
+            # #ActionChains(self.driver).move_to_element(element).click().pause(3).perform()
+            # self.driver.click(element)
+            element.click()
+            print('  OK clicked at {}'.format(element_name))
+            return True
+        except Exception as e:
+            pass
+
+        try:
+            self.send_keys_to_body(Keys.PAGE_UP)
+            element.click()
+            print('  OK clicked at {}'.format(element_name))
+            return True
+        except Exception as e:
+            pass
+
+        try:
+            self.send_keys_to_body(Keys.PAGE_DOWN)
+            element.click()
+            print('  OK clicked at {}'.format(element_name))
+            return True
+        except Exception as e:
+            pass
+
+        try:
+            self.send_keys_to_body(Keys.PAGE_DOWN)
+            element.click()
+            print('  OK clicked at {}'.format(element_name))
+            return True
+        except Exception as e:
+            print('  ERROR failed to click at {}: {}'.format(element_name, str(e)))
+            return False
+
+
+
+    def send_keys_to(self, element, element_name, keys):
+        time.sleep(1)
+        try:
+            element.send_keys(keys)
+            print('  OK send keys to {}'.format(element_name))
+            return True
+        except Exception as e:
+            print('  ERROR failed to send keys to {}: {}'.format(element_name, str(e)))
+            return False
+
+    def send_keys_to_body(self, keys):
+       return self.send_keys_to(self.driver.find_element_by_tag_name('body'), 'body', keys)
+
+
+    def create_soup(self, element=None, element_name=None):
+        if element:
+            try:
+                data = element.get_attribute('outerHTML')
+                soup = BeautifulSoup(data, 'html5lib')
+                print('  OK init BeautifulSoup from {}'.format(element_name))
+                return soup
+            except Exception as e:
+                print('  ERROR failed init BeautifulSoup from {}: {}'.format(element_name, str(e)))
+                return None
+        else:
+            try:
+                data = self.driver.page_source
+                soup = BeautifulSoup(data, 'html5lib')
+                print('  OK init BeautifulSoup from page_sorce')
+                return soup
+            except Exception as e:
+                print('  ERROR failed to init BeautifulSoup from page_sorce: {}'.format(str(e)))
+                return None
+
+
+    def back(self):
+        self.driver.back()
+
+
+    def move_to_random(self, randomize=5):
+        links = self.driver.find_elements_by_tag_name('a')
+        if not links or not len(links):
+            return False
+        link = random.choice(links)
+        return self.move_to(link, randomize)
