@@ -177,8 +177,9 @@ def process_transmission(bot, transmission):
                 if tag_span:
                     cmp_calc_price = tag_span.attrs["id"]
 
-        parts.append((articul, cmp_div_id, cmp_calc_price))
-        print('  INFO найден компонент {} '.format(articul))
+        if articul:
+            parts.append((articul, cmp_div_id, cmp_calc_price))
+            print('  INFO найден компонент {} '.format(articul))
 
 
     for counter,part in enumerate(parts):
