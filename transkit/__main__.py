@@ -153,6 +153,10 @@ def process_transmission(bot, transmission):
 
     input('Ждемс....')
 
+
+
+
+
     soup = bot.create_soup()
     tag_table = soup.find('table', attrs={'id': 'detailstable'})
     if not tag_table:
@@ -165,6 +169,9 @@ def process_transmission(bot, transmission):
         if tag_tr_class and 'transtabletopbg' in tag_tr_class:
             print('  INFO пропускаем заголовок таблицы')
             continue
+
+        # button class ="emailMe"
+
         articul, cmp_div_id, add_div_id = None, None, None
         for counter, tag_td in enumerate(tag_tr.findChildren('td', recursive=False)):
             if counter == 1:
@@ -175,7 +182,12 @@ def process_transmission(bot, transmission):
                 tag_div = tag_td.find('div')
                 if tag_div:
                     cmp_div_id = tag_div.attrs["id"]
-        parts.append((articul, cmp_div_id, add_div_id))
+            if counter == 6:
+                tag_span = tag_td.find('span', attrs={'class': 'calcPrice'},  recursive=False)
+                if tag_span:
+                    cmp_calc_price = tag_span.attrs["id"]
+
+        parts.append((articul, cmp_div_id, cmp_calc_price))
         print('  INFO найден компонент {} '.format(articul))
 
 
@@ -202,6 +214,10 @@ def process_transmission(bot, transmission):
             if num_compare >= random.randint(NUM_COMPARE_MIN, NUM_COMPARE_MAX):
                 if do_compare(bot):
                     num_compare = 0
+
+        price_span = bot.find(id=part[2])
+        bot.move_to(price_span, 'price_span', scroll=False, randomize=5, ybaseoffset=HEADEROFFSET)
+        bot.click_at(price_span, 'price_span')
 
     # полюбому перед выходом
     if num_compare >= 1:
