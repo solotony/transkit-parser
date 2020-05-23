@@ -9,9 +9,10 @@ from transkit.bot import Bot
 from bs4 import BeautifulSoup
 
 PROD = 1
+
 LOGIN = 'arttronic' if PROD else 'login'
 PASSWORD = 'ndef53' if PROD else 'password'
-TEST = 1
+TEST = 0 if PROD else 1
 
 NUM_COMPARE_MIN = 3
 NUM_COMPARE_MAX = 5 # максимально - 20
@@ -99,11 +100,17 @@ def process_login(bot):
         bot.move_to(login_input, 'login_input', scroll=False, randomize=5)
         bot.send_keys_to(login_input, LOGIN)
 
+        input('ждемс....')
+
         bot.move_to(password_input, 'password_input', scroll=False, randomize=5)
         bot.send_keys_to(password_input, PASSWORD)
 
+        input('ждемс....')
+
         bot.move_to(button_enter, 'button_enter', scroll=False, randomize=5)
         bot.click_at(button_enter, 'button_enter')
+
+        input('ждемс....')
 
     return True
 
