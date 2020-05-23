@@ -98,12 +98,12 @@ def process_login(bot):
 
     if not TEST:
         bot.move_to(login_input, 'login_input', scroll=False, randomize=5)
-        bot.send_keys_to(login_input, LOGIN)
+        bot.send_keys_to(login_input, 'login_input', LOGIN)
 
         input('ждемс....')
 
         bot.move_to(password_input, 'password_input', scroll=False, randomize=5)
-        bot.send_keys_to(password_input, PASSWORD)
+        bot.send_keys_to(password_input, 'password_input', PASSWORD)
 
         input('ждемс....')
 
