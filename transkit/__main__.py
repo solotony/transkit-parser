@@ -22,6 +22,7 @@ def main(args):
 
     if len(args) < 2:
         print('python -m transkit <имя_файла>')
+        exit(1)
 
     transmissions = []
     with open(args[1], 'r') as transmissions_file:
@@ -127,9 +128,11 @@ def process_login(bot):
         logging.info('do login')
 
         bot.move_to(login_input, 'login_input', scroll=False, randomize=5)
+        login_input.clear()
         bot.send_keys_to(login_input, 'login_input', LOGIN)
 
         bot.move_to(password_input, 'password_input', scroll=False, randomize=5)
+        login_input.clear()
         bot.send_keys_to(password_input, 'password_input', PASSWORD)
 
         bot.move_to(button_enter, 'button_enter', scroll=False, randomize=5)
@@ -161,6 +164,7 @@ def process_transmission(bot, transmission):
         exit('  CRITICAL Не могу кнопку поиска')
 
     bot.move_to(search_input, 'search_input', scroll=False, randomize=5)
+    search_input.clear()
     bot.send_keys_to(search_input, 'search_input', transmission)
 
     bot.move_to(search_button, 'search_button', scroll=False, randomize=5)
@@ -246,7 +250,7 @@ def process_transmission(bot, transmission):
             print('  YAHOO {}:{}'.format(part[0], price))
             data = { 'partno': part[0], 'price': price, 'token':'x777xx777x' }
             r = requests.post('https://mskakpp.ru/catalog/api/update-transkit/', json=data)
-            print('  MSKAKPP UPDATE:', r.status_code, r.content)
+            print('  SITE UPDATE:', r.status_code, r.content)
 
     # полюбому перед выходом
     if num_compare >= 1:

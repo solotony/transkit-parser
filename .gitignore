@@ -4,6 +4,7 @@
 *.orig
 *.iml
 *.cmd
+*.log
 cache
 media
 env
