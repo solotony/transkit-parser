@@ -132,7 +132,7 @@ def process_login(bot):
         bot.send_keys_to(login_input, 'login_input', LOGIN)
 
         bot.move_to(password_input, 'password_input', scroll=False, randomize=5)
-        login_input.clear()
+        password_input.clear()
         bot.send_keys_to(password_input, 'password_input', PASSWORD)
 
         bot.move_to(button_enter, 'button_enter', scroll=False, randomize=5)
