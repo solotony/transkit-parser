@@ -242,7 +242,7 @@ def process_transmission(bot, transmission):
 
         if part[2]:
             price_span = bot.find(id=part[2])
-            if price_span:
+            if not price_span:
                 logging.error('  не найден элемент рассчитать {}'.format(part[2]))
                 print('  ERROR не найден элемент рассчитать {}'.format(part[2]))
             else:
