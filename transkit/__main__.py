@@ -188,10 +188,9 @@ def process_transmission(bot, transmission):
             print('  INFO пропускаем заголовок таблицы')
             continue
 
-        if tag_tr.find('button', attrs={'class': 'emailMe'}, recursive=True):
-            logging.info('  пропускаем деталь нет в наличии')
-            print('  INFO пропускаем деталь нет в наличии')
-            continue
+        # if tag_tr.find('button', attrs={'class': 'emailMe'}, recursive=True):
+        #     logging.info('  пропускаем деталь нет в наличии')
+        #     print('  INFO пропускаем деталь нет в наличии')
 
         articul, cmp_div_id, cmp_calc_price = None, None, None
         for counter, tag_td in enumerate(tag_tr.findChildren('td', recursive=False)):
@@ -243,12 +242,24 @@ def process_transmission(bot, transmission):
 
         if part[2]:
             price_span = bot.find(id=part[2])
-            bot.move_to(price_span, 'price_span', scroll=False, randomize=5, ybaseoffset=HEADEROFFSET)
-            bot.click_at(price_span, 'price_span')
-            price_span = bot.find(xpath='//span[@id="{}"]/span'.format(part[2]))
-            price = price_span.get_attribute('innerHTML')
-            print('  YAHOO {}:{}'.format(part[0], price))
-            data = { 'partno': part[0], 'price': price, 'token':'x777xx777x' }
+            if price_span:
+                logging.error('  не найден элемент рассчитать {}'.format(part[2]))
+                print('  ERROR не найден элемент рассчитать {}'.format(part[2]))
+            else:
+                bot.move_to(price_span, 'price_span', scroll=False, randomize=5, ybaseoffset=HEADEROFFSET)
+                bot.click_at(price_span, 'price_span')
+                price_span = bot.find(xpath='//span[@id="{}"]/span'.format(part[2]))
+                if not price_span:
+                    logging.error('  не найден элемент с ценой для {}'.format(part[2]))
+                    print('  ERROR не найден элемент с ценой для {}'.format(part[2]))
+                else:
+                    price = price_span.get_attribute('innerHTML')
+                    print('  YAHOO {}:{}'.format(part[0], price))
+                    data = { 'partno': part[0], 'price': price, 'token':'x777xx777x' }
+                    r = requests.post('https://mskakpp.ru/catalog/api/update-transkit/', json=data)
+                    print('  SITE UPDATE:', r.status_code, r.content)
+        else:
+            data = {'partno': part[0], 'price': 0, 'token': 'x777xx777x'}
             r = requests.post('https://mskakpp.ru/catalog/api/update-transkit/', json=data)
             print('  SITE UPDATE:', r.status_code, r.content)
 
