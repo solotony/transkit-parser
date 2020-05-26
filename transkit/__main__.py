@@ -22,6 +22,7 @@ def main(args):
 
     if len(args) < 2:
         print('python -m transkit <имя_файла>')
+        exit(1)
 
     transmissions = []
     with open(args[1], 'r') as transmissions_file:
