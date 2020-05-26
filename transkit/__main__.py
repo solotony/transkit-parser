@@ -3,6 +3,7 @@ import sys
 from transkit.bot import Bot
 import requests
 import logging
+import time
 from datetime import datetime
 
 PROD = 1
@@ -77,6 +78,7 @@ def do_compare(bot):
     logging.info('Очистка сравнения')
     bot.move_to(clean_link, 'clean_link', scroll=False, randomize=5)
     bot.click_at(clean_link, 'clean_link')
+    time.sleep(random.randint(7, 15))
     bot.back()
     bot.back()
     return True
@@ -93,6 +95,7 @@ def do_view(bot, part_name):
     bot.move_to(a_link, 'a_link', scroll=False, randomize=5)
     bot.click_at(a_link, 'a_link')
     back_button = bot.find(xpath='//*[@id="pagecontent"]/button')
+    time.sleep(random.randint(7, 15))
     bot.move_to(back_button, 'back_button', scroll=False, randomize=5)
     bot.click_at(back_button, 'back_button')
 
@@ -144,6 +147,9 @@ def process_login(bot):
 
 
 def process_transmission(bot, transmission):
+
+    time.sleep(random.randint(7, 15))
+
     print('Коробка {}'.format(transmission))
     num_compare = 0
 
@@ -214,6 +220,8 @@ def process_transmission(bot, transmission):
 
 
     for counter,part in enumerate(parts):
+
+        time.sleep(random.randint(1,3))
 
         if random.random() < RANDOM_MOVE_TRESHOLD:
             bot.move_to_random()
