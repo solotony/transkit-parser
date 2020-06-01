@@ -12,9 +12,9 @@ PASSWORD = 'ndef53' if PROD else 'password'
 
 NUM_COMPARE_MIN = 3
 NUM_COMPARE_MAX = 5 # максимально - 20
-VIEW_TRESHOLD = 0.11 # от 0 до 1
-COMPARE_TRESHOLD = 0.11 # от 0 до 1
-RANDOM_MOVE_TRESHOLD = 0.11 # от 0 до 1
+VIEW_TRESHOLD = 0.7 # от 0 до 1
+COMPARE_TRESHOLD = 0.8 # от 0 до 1
+RANDOM_MOVE_TRESHOLD = 0.6 # от 0 до 1
 HEADEROFFSET=-170
 
 def main(args):
@@ -225,8 +225,6 @@ def process_transmission(bot, transmission):
 
     for counter,part in enumerate(parts):
 
-        time.sleep(random.randint(1,3))
-
         if random.random() < RANDOM_MOVE_TRESHOLD:
             bot.move_to_random()
 
@@ -257,6 +255,7 @@ def process_transmission(bot, transmission):
             r = requests.post('https://mskakpp.ru/catalog/api/update-transkit/', json=data)
             print('  SITE UPDATE:', r.status_code, r.content)
         elif part[2]:
+            time.sleep(random.randint(1, 3))
             price_span = bot.find(id=part[2])
             if not price_span:
                 logging.error('  не найден элемент рассчитать {}'.format(part[2]))
