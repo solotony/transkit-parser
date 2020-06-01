@@ -12,9 +12,9 @@ PASSWORD = 'ndef53' if PROD else 'password'
 
 NUM_COMPARE_MIN = 3
 NUM_COMPARE_MAX = 5 # максимально - 20
-VIEW_TRESHOLD = 0.16 # от 0 до 1
-COMPARE_TRESHOLD = 0.17 # от 0 до 1
-RANDOM_MOVE_TRESHOLD = 0.15 # от 0 до 1
+VIEW_TRESHOLD = 0.11 # от 0 до 1
+COMPARE_TRESHOLD = 0.11 # от 0 до 1
+RANDOM_MOVE_TRESHOLD = 0.11 # от 0 до 1
 HEADEROFFSET=-170
 
 def main(args):
@@ -215,17 +215,13 @@ def process_transmission(bot, transmission):
 
         for tag_td in tag_tr.findChildren('td', attrs={'class': 'spanPrice'}, recursive=False):
             price_at_page = tag_td.text
-            logging.info('  найдена цена {} '.format(price_at_page))
-            print('  INFO найдена цена {} '.format(price_at_page))
             break
 
 
         if articul:
             parts.append((articul, cmp_div_id, cmp_calc_price, price_at_page))
-            logging.info('  найден компонент {} '.format(articul))
-            print('  INFO найден компонент {} '.format(articul))
-
-    exit(0)
+            logging.info('  найден компонент {} ({}) '.format(articul, price_at_page))
+            print('  INFO найден компонент {} ({}) '.format(articul, price_at_page))
 
     for counter,part in enumerate(parts):
 
@@ -256,7 +252,11 @@ def process_transmission(bot, transmission):
                 if do_compare(bot):
                     num_compare = 0
 
-        if part[2]:
+        if part[3]:
+            data = {'partno': part[0], 'price': part[3], 'token': 'x777xx777x'}
+            r = requests.post('https://mskakpp.ru/catalog/api/update-transkit/', json=data)
+            print('  SITE UPDATE:', r.status_code, r.content)
+        elif part[2]:
             price_span = bot.find(id=part[2])
             if not price_span:
                 logging.error('  не найден элемент рассчитать {}'.format(part[2]))
