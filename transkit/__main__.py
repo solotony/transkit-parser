@@ -12,9 +12,9 @@ PASSWORD = 'ndef53' if PROD else 'password'
 
 NUM_COMPARE_MIN = 3
 NUM_COMPARE_MAX = 5 # максимально - 20
-VIEW_TRESHOLD = 0.7 # от 0 до 1
-COMPARE_TRESHOLD = 0.8 # от 0 до 1
-RANDOM_MOVE_TRESHOLD = 0.6 # от 0 до 1
+VIEW_TRESHOLD = 0.07 # от 0 до 1
+COMPARE_TRESHOLD = 0.08 # от 0 до 1
+RANDOM_MOVE_TRESHOLD = 0.06 # от 0 до 1
 HEADEROFFSET=-170
 
 def main(args):
