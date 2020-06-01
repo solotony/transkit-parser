@@ -198,7 +198,7 @@ def process_transmission(bot, transmission):
         #     logging.info('  пропускаем деталь нет в наличии')
         #     print('  INFO пропускаем деталь нет в наличии')
 
-        articul, cmp_div_id, cmp_calc_price = None, None, None
+        articul, cmp_div_id, cmp_calc_price, price_at_page = None, None, None, None
         for counter, tag_td in enumerate(tag_tr.findChildren('td', recursive=False)):
             if counter == 1:
                 tag_a = tag_td.find('a')
@@ -213,11 +213,19 @@ def process_transmission(bot, transmission):
                 if tag_span:
                     cmp_calc_price = tag_span.attrs["id"]
 
+        for tag_td in tag_tr.findChildren('td', attrs={'class': 'spanPrice'}, recursive=False):
+            price_at_page = tag_td.text
+            logging.info('  найдена цена {} '.format(price_at_page))
+            print('  INFO найдена цена {} '.format(price_at_page))
+            break
+
+
         if articul:
-            parts.append((articul, cmp_div_id, cmp_calc_price))
+            parts.append((articul, cmp_div_id, cmp_calc_price, price_at_page))
             logging.info('  найден компонент {} '.format(articul))
             print('  INFO найден компонент {} '.format(articul))
 
+    exit(0)
 
     for counter,part in enumerate(parts):
 
