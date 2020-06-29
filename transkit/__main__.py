@@ -50,8 +50,13 @@ def main(args):
 
     for transmission in transmissions:
         logging.info('начинаем коробку {}'.format(transmission))
+        print('начинаем коробку {}'.format(transmission))
         process_transmission(bot, transmission)
         logging.info('завершена коробка {}'.format(transmission))
+        print('завершена коробка {}'.format(transmission))
+
+    x = input("Нажмите кнопку 'ввод' для завершения:")
+
 
 def do_compare(bot):
     logging.info('Выполняется сравнение')
@@ -177,6 +182,7 @@ def process_transmission(bot, transmission):
     bot.click_at(search_button, 'search_button')
 
     view_mode_button = bot.find(xpath='//*[@title="Показать все детали трансмиссии в виде таблицы"]')
+                                                   #Показать все детали трансмиссии в виде таблицы
     bot.click_at(view_mode_button, 'view_mode_button')
 
     soup = bot.create_soup()
