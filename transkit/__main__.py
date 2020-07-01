@@ -306,7 +306,7 @@ def process_transmission(bot, transmission):
             print('  SITE UPDATE:', r.status_code, r.content)
             logging.info('update: {}'.format(str(data)))
 
-    # полюбому перед выходом
+    # полюбому перед выходом!
     if num_compare >= 1:
         do_compare(bot)
 
