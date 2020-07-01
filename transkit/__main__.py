@@ -152,6 +152,11 @@ def process_login(bot):
 
 
 def process_transmission(bot, transmission):
+    transmission = transmission.strip()
+    if not transmission:
+        logging.error('Коробка не указана')
+        print('  Коробка не указана')
+        return False
 
     time.sleep(random.randint(7, 15))
 
@@ -257,7 +262,12 @@ def process_transmission(bot, transmission):
                     num_compare = 0
 
         if part[3]:
-            data = {'partno': part[0], 'price': part[3], 'token': 'x777xx777x'}
+            data = {
+                'transmission': transmission,
+                'partno': part[0],
+                'price': part[3],
+                'token': 'x777xx777x'
+            }
             r = requests.post('https://mskakpp.ru/catalog/api/update-transkit/', json=data)
             print('  SITE UPDATE:', r.status_code, r.content)
         elif part[2]:
@@ -276,13 +286,25 @@ def process_transmission(bot, transmission):
                 else:
                     price = price_span.get_attribute('innerHTML')
                     print('  YAHOO {}:{}'.format(part[0], price))
-                    data = { 'partno': part[0], 'price': price, 'token':'x777xx777x' }
+                    data = {
+                        'transmission': transmission,
+                        'partno': part[0],
+                        'price': price,
+                        'token':'x777xx777x'
+                    }
                     r = requests.post('https://mskakpp.ru/catalog/api/update-transkit/', json=data)
                     print('  SITE UPDATE:', r.status_code, r.content)
+                    logging.info('update: {}'.format(str(data)))
         else:
-            data = {'partno': part[0], 'price': 0, 'token': 'x777xx777x'}
+            data = {
+                'transmission': transmission,
+                'partno': part[0],
+                'price': 0,
+                'token': 'x777xx777x'
+            }
             r = requests.post('https://mskakpp.ru/catalog/api/update-transkit/', json=data)
             print('  SITE UPDATE:', r.status_code, r.content)
+            logging.info('update: {}'.format(str(data)))
 
     # полюбому перед выходом
     if num_compare >= 1:
