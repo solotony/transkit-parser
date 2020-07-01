@@ -270,6 +270,7 @@ def process_transmission(bot, transmission):
             }
             r = requests.post('https://mskakpp.ru/catalog/api/update-transkit/', json=data)
             print('  SITE UPDATE:', r.status_code, r.content)
+            logging.info('update: {}'.format(str(data)))
         elif part[2]:
             time.sleep(random.randint(1, 3))
             price_span = bot.find(id=part[2])
@@ -306,7 +307,7 @@ def process_transmission(bot, transmission):
             print('  SITE UPDATE:', r.status_code, r.content)
             logging.info('update: {}'.format(str(data)))
 
-    # полюбому перед выходом!
+    # полюбому перед выходом!!
     if num_compare >= 1:
         do_compare(bot)
 
