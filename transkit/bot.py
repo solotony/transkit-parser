@@ -12,6 +12,9 @@ import logging
 
 class Bot:
 
+    def sleep(self, t):
+        time.sleep(t)
+
     RANDOFFSETX = random.randint(10, 15)
     RANDOFFSETY = random.randint(10, 15)
 
@@ -27,7 +30,7 @@ class Bot:
 
 
     def find(self, id=None, name=None, xpath=None, link_text=None, link_text_part=None, tag_name=None):
-        time.sleep(2)
+        self.sleep(2)
         try:
             if id:
                 element = self.driver.find_element_by_id(id)
@@ -80,7 +83,7 @@ class Bot:
         self.driver.execute_script(scroll_nav_out_of_way)
 
     def move_to(self, element, element_name, scroll=False, randomize=0, ybaseoffset=0):
-        time.sleep(2)
+        self.sleep(2)
         try:
             if scroll:
                 location = element.location_once_scrolled_into_view
@@ -136,7 +139,7 @@ class Bot:
             return False
 
     def click_at(self, element, element_name):
-        time.sleep(2)
+        self.sleep(2)
         try:
             # #ActionChains(self.driver).move_to_element(element).click().pause(3).perform()
             # self.driver.click(element)
@@ -179,7 +182,7 @@ class Bot:
 
 
     def send_keys_to(self, element, element_name, keys):
-        time.sleep(2)
+        self.sleep(2)
         try:
             element.send_keys(keys)
             logging.debug('send keys to {}'.format(element_name))

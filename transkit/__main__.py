@@ -3,7 +3,6 @@ import sys
 from transkit.bot import Bot
 import requests
 import logging
-import time
 from datetime import datetime
 
 PROD = 1
@@ -83,7 +82,7 @@ def do_compare(bot):
     logging.info('Очистка сравнения')
     bot.move_to(clean_link, 'clean_link', scroll=False, randomize=5)
     bot.click_at(clean_link, 'clean_link')
-    time.sleep(random.randint(7, 15))
+    bot.sleep(random.randint(7, 15))
     bot.back()
     bot.back()
     return True
@@ -100,7 +99,7 @@ def do_view(bot, part_name):
     bot.move_to(a_link, 'a_link', scroll=False, randomize=5)
     bot.click_at(a_link, 'a_link')
     back_button = bot.find(xpath='//*[@id="pagecontent"]/button')
-    time.sleep(random.randint(7, 15))
+    bot.sleep(random.randint(7, 15))
     bot.move_to(back_button, 'back_button', scroll=False, randomize=5)
     bot.click_at(back_button, 'back_button')
 
@@ -158,7 +157,7 @@ def process_transmission(bot, transmission):
         print('  Коробка не указана')
         return False
 
-    time.sleep(random.randint(7, 15))
+    bot.sleep(random.randint(7, 15))
 
     print('Коробка {}'.format(transmission))
     num_compare = 0
@@ -187,7 +186,26 @@ def process_transmission(bot, transmission):
     bot.click_at(search_button, 'search_button')
 
     view_mode_button = bot.find(xpath='//*[@title="Показать все детали трансмиссии в виде таблицы"]')
-                                                   #Показать все детали трансмиссии в виде таблицы
+    if not view_mode_button:
+        transmission_link = bot.find(xpath='//a[text()="{}"]'.format(transmission))
+        bot.move_to(transmission_link, 'transmission_link', scroll=False, randomize=5)
+        bot.click_at(transmission_link, 'transmission_link')
+        view_mode_button = bot.find(xpath='//*[@title="Показать все детали трансмиссии в виде таблицы"]')
+        if not view_mode_button:
+            transmission_search_link = bot.find(xpath='//p[text()="Трансмиссия"]')
+            bot.move_to(transmission_search_link, 'transmission_search_link', scroll=False, randomize=5)
+            bot.click_at(transmission_search_link, 'transmission_search_link')
+            view_mode_button = bot.find(xpath='//*[@title="Показать все детали трансмиссии в виде таблицы"]')
+            if not view_mode_button:
+                transmission_link = bot.find(xpath='//a[text()="{}"]'.format(transmission))
+                bot.move_to(transmission_link, 'transmission_link', scroll=False, randomize=5)
+                bot.click_at(transmission_link, 'transmission_link')
+                view_mode_button = bot.find(xpath='//*[@title="Показать все детали трансмиссии в виде таблицы"]')
+                if not view_mode_button:
+                    logging.error('кнопка режима просмотра не найдена')
+                    print('  ERROR кнопка режима просмотра не найдена')
+                    return False
+
     bot.click_at(view_mode_button, 'view_mode_button')
 
     soup = bot.create_soup()
@@ -262,17 +280,18 @@ def process_transmission(bot, transmission):
                     num_compare = 0
 
         if part[3]:
-            data = {
-                'transmission': transmission,
-                'partno': part[0],
-                'price': part[3],
-                'token': 'x777xx777x'
-            }
-            r = requests.post('https://mskakpp.ru/catalog/api/update-transkit/', json=data)
-            print('  SITE UPDATE:', r.status_code, r.content)
-            logging.info('update: {}'.format(str(data)))
+            if PROD:
+                data = {
+                    'transmission': transmission,
+                    'partno': part[0],
+                    'price': part[3],
+                    'token': 'x777xx777x'
+                }
+                r = requests.post('https://mskakpp.ru/catalog/api/update-transkit/', json=data)
+                print('  SITE UPDATE:', r.status_code, r.content)
+                logging.info('update: {}'.format(str(data)))
         elif part[2]:
-            time.sleep(random.randint(1, 3))
+            bot.sleep(random.randint(1, 3))
             price_span = bot.find(id=part[2])
             if not price_span:
                 logging.error('  не найден элемент рассчитать {}'.format(part[2]))
@@ -285,27 +304,29 @@ def process_transmission(bot, transmission):
                     logging.error('  не найден элемент с ценой для {}'.format(part[2]))
                     print('  ERROR не найден элемент с ценой для {}'.format(part[2]))
                 else:
-                    price = price_span.get_attribute('innerHTML')
-                    print('  YAHOO {}:{}'.format(part[0], price))
-                    data = {
-                        'transmission': transmission,
-                        'partno': part[0],
-                        'price': price,
-                        'token':'x777xx777x'
-                    }
-                    r = requests.post('https://mskakpp.ru/catalog/api/update-transkit/', json=data)
-                    print('  SITE UPDATE:', r.status_code, r.content)
-                    logging.info('update: {}'.format(str(data)))
+                    if PROD:
+                        price = price_span.get_attribute('innerHTML')
+                        print('  YAHOO {}:{}'.format(part[0], price))
+                        data = {
+                            'transmission': transmission,
+                            'partno': part[0],
+                            'price': price,
+                            'token':'x777xx777x'
+                        }
+                        r = requests.post('https://mskakpp.ru/catalog/api/update-transkit/', json=data)
+                        print('  SITE UPDATE:', r.status_code, r.content)
+                        logging.info('update: {}'.format(str(data)))
         else:
-            data = {
-                'transmission': transmission,
-                'partno': part[0],
-                'price': 0,
-                'token': 'x777xx777x'
-            }
-            r = requests.post('https://mskakpp.ru/catalog/api/update-transkit/', json=data)
-            print('  SITE UPDATE:', r.status_code, r.content)
-            logging.info('update: {}'.format(str(data)))
+            if PROD:
+                data = {
+                    'transmission': transmission,
+                    'partno': part[0],
+                    'price': 0,
+                    'token': 'x777xx777x'
+                }
+                r = requests.post('https://mskakpp.ru/catalog/api/update-transkit/', json=data)
+                print('  SITE UPDATE:', r.status_code, r.content)
+                logging.info('update: {}'.format(str(data)))
 
     # полюбому перед выходом!!
     if num_compare >= 1:
