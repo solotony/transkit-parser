@@ -4,8 +4,10 @@ from transkit.bot import Bot
 import requests
 import logging
 from datetime import datetime
+from .globals import PROD
+from .globals import DRIVER
+from .globals import PROFILE
 
-PROD = 1
 LOGIN = 'arttronic' if PROD else 'login'
 PASSWORD = 'ndef53' if PROD else 'password'
 
@@ -28,7 +30,7 @@ def main(args):
     with open(args[1], 'r') as transmissions_file:
         transmissions = [row.strip() for row in transmissions_file]
 
-    bot = Bot('http://www.transkit.ru/', PROD)
+    bot = Bot('http://www.transkit.ru/', PROD, DRIVER, PROFILE)
 
     if bot.find(id='menuIconAccountActiveArea'):
         print('  INFO уже залогинены')

@@ -9,22 +9,27 @@ from bs4 import BeautifulSoup
 import time
 import random
 import logging
+from .globals import PROD
 
 class Bot:
 
     def sleep(self, t):
-        time.sleep(t)
+        if PROD:
+            time.sleep(t)
 
     RANDOFFSETX = random.randint(10, 15)
     RANDOFFSETY = random.randint(10, 15)
 
-    def __init__(self, starturl, prod_mode):
+    def __init__(self, starturl, prod_mode, driver, profile):
         self.prod_mode = prod_mode
         self.starturl = starturl
-        if prod_mode:
+        if driver == 'CHROME':
             self.driver = webdriver.Chrome()
-        else:
-            self.driver = webdriver.Firefox()
+        elif driver == 'FF':
+            if profile is None:
+                self.driver = webdriver.Firefox()
+            else:
+                self.driver = webdriver.Firefox(profile)
         self.driver.maximize_window()
         self.driver.get(self.starturl)
 
