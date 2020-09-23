@@ -35,5 +35,4 @@ node_modules
 *.sublime-workspace
 
 
-/data
 /log
