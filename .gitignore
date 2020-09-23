@@ -33,3 +33,7 @@ node_modules
 .DS_Store
 *.sublime-project
 *.sublime-workspace
+
+
+/data
+/log
