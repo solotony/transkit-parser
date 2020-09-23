@@ -20,7 +20,7 @@ HEADEROFFSET=-170
 
 def main(args):
 
-    logging.basicConfig( filename="transkit-parse-{}.log".format(datetime.now().strftime('%Y%m%d%H%M')), level=logging.INFO )
+    logging.basicConfig( filename="log/transkit-parse-{}.log".format(datetime.now().strftime('%Y%m%d%H%M')), level=logging.INFO )
 
     if len(args) < 2:
         print('python -m transkit <имя_файла>')
