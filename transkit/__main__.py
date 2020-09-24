@@ -4,9 +4,7 @@ from transkit.bot import Bot
 import requests
 import logging
 from datetime import datetime
-from .globals import PROD
-from .globals import DRIVER
-from .globals import PROFILE
+from .globals import PROD, DRIVER, PROFILE, DELAY_MIN, DELAY_MAX
 
 LOGIN = 'arttronic' if PROD else 'login'
 PASSWORD = 'ndef53' if PROD else 'password'
@@ -14,7 +12,7 @@ PASSWORD = 'ndef53' if PROD else 'password'
 NUM_COMPARE_MIN = 3
 NUM_COMPARE_MAX = 5 # максимально - 20
 VIEW_TRESHOLD = 0.07 # от 0 до 1
-COMPARE_TRESHOLD = 0.08 # от 0 до 1
+COMPARE_TRESHOLD = 0.03 # от 0 до 1
 RANDOM_MOVE_TRESHOLD = 0.06 # от 0 до 1
 HEADEROFFSET=-170
 
@@ -48,15 +46,17 @@ def main(args):
                 logging.critical('логин ахтунг!!!!!!!!!!!!')
                 exit('  CRITICAL логин ахтунг!!!!!!!!!!!!')
 
-
+    first = True
     for transmission in transmissions:
+        if not first:
+            bot.sleep(random.randint(DELAY_MIN, DELAY_MAX))
+        first = False
         logging.info('начинаем коробку {}'.format(transmission))
         print('начинаем коробку {}'.format(transmission))
         process_transmission(bot, transmission)
         logging.info('завершена коробка {}'.format(transmission))
         print('завершена коробка {}'.format(transmission))
 
-    x = input("Нажмите кнопку 'ввод' для завершения:")
 
 
 def do_compare(bot):
@@ -150,7 +150,6 @@ def process_login(bot):
         logging.info('login skipped')
 
     return True
-
 
 def process_transmission(bot, transmission):
     transmission = transmission.strip()
