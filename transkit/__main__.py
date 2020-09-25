@@ -253,6 +253,19 @@ def process_transmission(bot, transmission):
             logging.info('  найден компонент {} ({}) '.format(articul, price_at_page))
             print('  INFO найден компонент {} ({}) '.format(articul, price_at_page))
 
+    for counter, part in enumerate(parts):
+        if part[3]:
+            if PROD:
+                data = {
+                    'transmission': transmission,
+                    'partno': part[0],
+                    'price': part[3],
+                    'token': 'x777xx777x'
+                }
+                r = requests.post('https://mskakpp.ru/catalog/api/update-transkit/', json=data)
+                print('  SITE UPDATE:', r.status_code, r.content)
+                logging.info('update: {}'.format(str(data)))
+
     for counter,part in enumerate(parts):
 
         if random.random() < RANDOM_MOVE_TRESHOLD:
@@ -281,16 +294,7 @@ def process_transmission(bot, transmission):
                     num_compare = 0
 
         if part[3]:
-            if PROD:
-                data = {
-                    'transmission': transmission,
-                    'partno': part[0],
-                    'price': part[3],
-                    'token': 'x777xx777x'
-                }
-                r = requests.post('https://mskakpp.ru/catalog/api/update-transkit/', json=data)
-                print('  SITE UPDATE:', r.status_code, r.content)
-                logging.info('update: {}'.format(str(data)))
+            pass
         elif part[2]:
             bot.sleep(random.randint(1, 3))
             price_span = bot.find(id=part[2])
