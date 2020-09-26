@@ -96,16 +96,22 @@ def main(args):
         if not first:
             bot.sleep(random.randint(DELAY_MIN, DELAY_MAX))
         first = False
-        logging.info('начинаем коробку {}'.format(transmission))
-        process_transmission(bot, transmission)
-        logging.info('завершена коробка {}'.format(transmission))
+        try:
+            process_transmission(bot, transmission)
+            logging.info('завершена коробка {}'.format(transmission))
+            requests.post('https://mskakpp.ru/parsers/transkit-ok/{}/'.format(local_day),
+                          data={'transmission': transmission})
+        except Exception as e:
+            logging.info('ошибка при обработке коробки {} {}'.format(transmission, str(e)))
+            requests.post('https://mskakpp.ru/parsers/transkit-fail/{}/'.format(local_day),
+                          data={'transmission': transmission})
+
         if stop_at and stop_at < datetime.now().time():
             logging.info('время вышло, увы')
             break
 
     logging.info('завершено сканирование')
-    ulr = 'https://mskakpp.ru/parsers/transkit-stop/{}/'.format(local_day)
-    requests.post(ulr)
+    requests.post('https://mskakpp.ru/parsers/transkit-stop/{}/'.format(local_day))
 
 def do_compare(bot):
     logging.info('Выполняется сравнение')

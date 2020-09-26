@@ -40,40 +40,32 @@ class Bot:
             if id:
                 element = self.driver.find_element_by_id(id)
                 logging.debug('find ok element with id="{}"'.format(id))
-                print('  OK element with id="{}"'.format(id))
                 return element
             if name:
                 element = self.driver.find_element_by_name(name)
                 logging.debug('find ok element with name="{}"'.format(name))
-                print('  OK element with name="{}"'.format(name))
                 return element
             if xpath:
                 element = self.driver.find_element_by_xpath(xpath)
                 logging.debug('find ok element with xpath="{}"'.format(xpath))
-                print('  OK element with xpath="{}"'.format(xpath))
                 return element
             if link_text:
                 element = self.driver.find_element_by_link_text(link_text)
                 logging.debug('find ok element with link_text="{}"'.format(link_text))
-                print('  OK element with link_text="{}"'.format(link_text))
                 return element
             if link_text_part:
                 element = self.driver.find_element_by_partial_link_text(link_text_part)
                 logging.debug('find ok element with link_text_part="{}"'.format(link_text_part))
-                print('  OK element with link_text_part="{}"'.format(link_text_part))
                 return element
             if tag_name:
                 element = self.driver.find_element_by_tag_name(tag_name)
                 logging.debug('find ok element with tag_name="{}"'.format(tag_name))
-                print('  OK element with tag_name="{}"'.format(tag_name))
                 return element
             else:
                 logging.error('bad find_element params')
-                print('  ERROR bad find_element params')
                 return None
         except Exception as e:
             logging.error('find_element failed: {}'.format(str(e)))
-            print('  ERROR find_element failed: {}'.format(str(e)))
             return None
 
     def scroll_shim(self, object, ybaseoffset=0):
@@ -95,15 +87,12 @@ class Bot:
             else:
                 location = element.location
             logging.debug('location of {} is {}'.format(element_name, str(location)))
-            print('  INFO location of {} is {}'.format(element_name, str(location)))
         except Exception as e:
             logging.error('failed to get location of {}: {}'.format(element_name, str(e)))
-            print('  ERROR failed to get location of {}: {}'.format(element_name, str(e)))
             return False
         if randomize:
             steps = random.randint(2,randomize)
             logging.debug('randomize {} steps {}: '.format(randomize, steps))
-            print('  INFO randomize {} steps {}: '.format(randomize, steps), end=' ')
             for step in reversed(range(1, steps+1)):
                 actions = ActionChains(self.driver)
                 x_offset = random.randint(-step*self.RANDOFFSETX,step*self.RANDOFFSETX)
@@ -112,35 +101,28 @@ class Bot:
                     actions.move_to_element_with_offset(element, x_offset, y_offset+ybaseoffset)
                     actions.pause(random.random()*2)
                     actions.perform()
-                    print('+({},{})'.format(x_offset, y_offset), end=' ')
+                    logging.debug('+({},{})'.format(x_offset, y_offset), end=' ')
                 except Exception as e:
-                    print('x({},{})'.format(x_offset, y_offset), end=' ')
-            print()
+                    logging.debug('x({},{})'.format(x_offset, y_offset), end=' ')
         try:
             actions = ActionChains(self.driver)
             actions.move_to_element_with_offset(element, 0, ybaseoffset)
             actions.pause(random.random()*2)
             actions.perform()
             logging.debug('moved to {}'.format(element_name))
-            print('  OK moved to {}'.format(element_name))
             return True
         except Exception as e:
             logging.debug('retry with scroll'.format(element_name, str(e)))
-            print('  retry with scroll'.format(element_name, str(e)))
-
         self.scroll_shim(element)
-
         try:
             actions = ActionChains(self.driver)
             actions.move_to_element(element)
             actions.pause(random.random()*2)
             actions.perform()
             logging.debug('moved (with scrioll) to {}'.format(element_name))
-            print('  OK moved (with scrioll) to {}'.format(element_name))
             return True
         except Exception as e:
             logging.error('failed to move to {}: {}'.format(element_name, str(e)))
-            print('  ERROR failed to move to {}: {}'.format(element_name, str(e)))
             return False
 
     def click_at(self, element, element_name):
@@ -150,7 +132,6 @@ class Bot:
             # self.driver.click(element)
             element.click()
             logging.debug('clicked at {}'.format(element_name))
-            print('  OK clicked at {}'.format(element_name))
             return True
         except Exception as e:
             pass
@@ -159,7 +140,6 @@ class Bot:
             self.send_keys_to_body(Keys.PAGE_UP)
             element.click()
             logging.debug('clicked at {}'.format(element_name))
-            print('  OK clicked at {}'.format(element_name))
             return True
         except Exception as e:
             pass
@@ -168,7 +148,6 @@ class Bot:
             self.send_keys_to_body(Keys.PAGE_DOWN)
             element.click()
             logging.debug('clicked at {}'.format(element_name))
-            print('  OK clicked at {}'.format(element_name))
             return True
         except Exception as e:
             pass
@@ -177,11 +156,9 @@ class Bot:
             self.send_keys_to_body(Keys.PAGE_DOWN)
             element.click()
             logging.debug('clicked at {}'.format(element_name))
-            print('  OK clicked at {}'.format(element_name))
             return True
         except Exception as e:
             logging.error('failed to click at {}: {}'.format(element_name, str(e)))
-            print('  ERROR failed to click at {}: {}'.format(element_name, str(e)))
             return False
 
 
@@ -191,11 +168,9 @@ class Bot:
         try:
             element.send_keys(keys)
             logging.debug('send keys to {}'.format(element_name))
-            print('  OK send keys to {}'.format(element_name))
             return True
         except Exception as e:
             logging.error('failed to send keys to {}: {}'.format(element_name, str(e)))
-            print('  ERROR failed to send keys to {}: {}'.format(element_name, str(e)))
             return False
 
     def send_keys_to_body(self, keys):
@@ -208,24 +183,19 @@ class Bot:
                 data = element.get_attribute('outerHTML')
                 soup = BeautifulSoup(data, 'html5lib')
                 logging.debug('init BeautifulSoup from {}'.format(element_name))
-                print('  OK init BeautifulSoup from {}'.format(element_name))
                 return soup
             except Exception as e:
                 logging.error('failed init BeautifulSoup from {}: {}'.format(element_name, str(e)))
-                print('  ERROR failed init BeautifulSoup from {}: {}'.format(element_name, str(e)))
                 return None
         else:
             try:
                 data = self.driver.page_source
                 soup = BeautifulSoup(data, 'html5lib')
                 logging.debug('init BeautifulSoup from page_sorce')
-                print('  OK init BeautifulSoup from page_sorce')
                 return soup
             except Exception as e:
                 logging.error('failed to init BeautifulSoup from page_sorce: {}'.format(str(e)))
-                print('  ERROR failed to init BeautifulSoup from page_sorce: {}'.format(str(e)))
                 return None
-
 
     def back(self):
         self.driver.back()
