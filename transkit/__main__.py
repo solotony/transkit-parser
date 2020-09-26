@@ -49,14 +49,21 @@ def main(args):
             r = requests.get(ulr)
             if r.status_code!=200:
                 failed('Ошибка получения данных с сервера: {}'.format(r.status_code))
-            print(json.loads(r.text))
+            shedule = json.loads(r.text)
+            if not 'transmissions_list' in shedule:
+                failed('Расписание пусто: {}'.format(r.text))
+            transmissions = shedule['transmissions_list'].split('\n')
+            if not len(transmissions):
+                failed('Расписание пусто: {}'.format(r.text))
         except Exception as e:
             failed('Ошибка при получения данных с сервера: {}'.format(str(e)))
     else:
         with open(args[1], 'r') as transmissions_file:
             transmissions = [row.strip() for row in transmissions_file]
+        if not len(transmissions):
+            failed('Расписание пусто: файл={}'.format(args[1]))
 
-    logging.info('Начинаем сканирование')
+    logging.info('Начинаем сканирование: {}'.format(transmissions))
     ulr = 'https://mskakpp.ru/parsers/transkit-start/{}/'.format(local_day)
     requests.post(ulr)
 
