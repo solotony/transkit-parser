@@ -5,6 +5,7 @@ import requests
 import logging
 import pytz
 from datetime import datetime, timezone, tzinfo
+import time
 import json
 
 from .globals import PROD, DRIVER, PROFILE, DELAY_MIN, DELAY_MAX
@@ -41,6 +42,7 @@ def main(args):
         failed('формат запуска: python -m transkit shedule|<имя_файла>')
 
     transmissions = []
+    stop_at, start_at = None, None
 
     if args[1]=='shedule':
         logging.info('Загружаем расписание')
@@ -55,6 +57,14 @@ def main(args):
             transmissions = shedule['transmissions_list'].split('\n')
             if not len(transmissions):
                 failed('Расписание пусто: {}'.format(r.text))
+            if 'start_at' in shedule:
+                start_at = datetime.strptime(shedule['start_at'], '%H:%M:%S').time()
+            if 'stop_at' in shedule:
+                stop_at = datetime.strptime(shedule['stop_at'], '%H:%M:%S').time()
+            if start_at and start_at > datetime.now().time():
+                logging.info('спим до {}'.format(start_at))
+            while start_at and start_at > datetime.now().time():
+                time.sleep(1)
         except Exception as e:
             failed('Ошибка при получения данных с сервера: {}'.format(str(e)))
     else:
@@ -67,10 +77,7 @@ def main(args):
     ulr = 'https://mskakpp.ru/parsers/transkit-start/{}/'.format(local_day)
     requests.post(ulr)
 
-    exit(0)
-
     bot = Bot('http://www.transkit.ru/', PROD, DRIVER, PROFILE)
-
     if bot.find(id='menuIconAccountActiveArea'):
         logging.info('  уже залогинены')
     else:
@@ -92,6 +99,9 @@ def main(args):
         logging.info('начинаем коробку {}'.format(transmission))
         process_transmission(bot, transmission)
         logging.info('завершена коробка {}'.format(transmission))
+        if stop_at and stop_at < datetime.now().time():
+            logging.info('время вышло, увы')
+            break
 
     logging.info('завершено сканирование')
     ulr = 'https://mskakpp.ru/parsers/transkit-stop/{}/'.format(local_day)
