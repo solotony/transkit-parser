@@ -52,7 +52,7 @@ def main(args):
             shedule = json.loads(r.text)
             if not 'transmissions_list' in shedule:
                 failed('Расписание пусто: {}'.format(r.text))
-            transmissions = shedule['tramsissions_list'].split('\n')
+            transmissions = shedule['transmissions_list'].split('\n')
             if not len(transmissions):
                 failed('Расписание пусто: {}'.format(r.text))
         except Exception as e:
