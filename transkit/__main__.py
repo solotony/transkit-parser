@@ -48,6 +48,7 @@ def main(args):
         logging.info('Загружаем расписание')
         try:
             ulr = 'https://mskakpp.ru/parsers/transkit-shedule/{}/'.format(local_day)
+            print(ulr)
             r = requests.get(ulr)
             if r.status_code!=200:
                 failed('Ошибка получения данных с сервера: {}'.format(r.status_code))
@@ -103,8 +104,6 @@ def main(args):
                           data={'transmission': transmission})
         except Exception as e:
             logging.info('ошибка при обработке коробки {} {}'.format(transmission, str(e)))
-            requests.post('https://mskakpp.ru/parsers/transkit-fail/{}/'.format(local_day),
-                          data={'transmission': transmission})
 
         if stop_at and stop_at < datetime.now().time():
             logging.info('время вышло, увы')
