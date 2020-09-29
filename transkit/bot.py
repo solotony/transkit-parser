@@ -24,7 +24,7 @@ class Bot:
     def __init__(self, starturl, prod_mode, driver, profile, hidden):
         self.display = None
         if hidden:
-            self.display = Display(visible=1, size=(1280, 1024))
+            self.display = Display(visible=0, size=(1280, 1024))
             self.display.start()
         self.prod_mode = prod_mode
         self.starturl = starturl
