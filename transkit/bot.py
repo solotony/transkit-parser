@@ -10,6 +10,7 @@ import time
 import random
 import logging
 from .globals import PROD
+from pyvirtualdisplay import Display
 
 class Bot:
 
@@ -20,7 +21,11 @@ class Bot:
     RANDOFFSETX = random.randint(10, 15)
     RANDOFFSETY = random.randint(10, 15)
 
-    def __init__(self, starturl, prod_mode, driver, profile):
+    def __init__(self, starturl, prod_mode, driver, profile, hidden):
+        self.display = None
+        if hidden:
+            self.display = Display(visible=1, size=(1280, 1024))
+            self.display.start()
         self.prod_mode = prod_mode
         self.starturl = starturl
         if driver == 'CHROME':
@@ -32,6 +37,11 @@ class Bot:
                 self.driver = webdriver.Firefox(profile)
         self.driver.maximize_window()
         self.driver.get(self.starturl)
+
+    def __del__(self):
+        if self.display is not None:
+            self.display.stop()
+
 
 
     def find(self, id=None, name=None, xpath=None, link_text=None, link_text_part=None, tag_name=None):
