@@ -38,6 +38,11 @@ class Bot:
         self.driver.maximize_window()
         self.driver.get(self.starturl)
 
+
+    def getstart(self):
+        self.driver.get(self.starturl)
+
+
     def __del__(self):
         if self.display is not None:
             self.display.stop()

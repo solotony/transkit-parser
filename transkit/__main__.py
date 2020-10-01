@@ -200,6 +200,9 @@ def process_transmission(bot, transmission):
         logging.error('Коробка не указана')
         return False
 
+    logging.info('идем на главную страницу')
+    bot.getstart()
+
     bot.sleep(random.randint(7, 15))
 
     logging.info('начинаем коробку {}'.format(transmission))
@@ -225,7 +228,8 @@ def process_transmission(bot, transmission):
     bot.send_keys_to(search_input, 'search_input', transmission)
 
     bot.move_to(search_button, 'search_button', scroll=False, randomize=5)
-    bot.click_at(search_button, 'search_button')
+    if not bot.click_at(search_button, 'search_button'):
+        return False
 
     view_mode_button = bot.find(xpath='//*[@title="Показать все детали трансмиссии в виде таблицы"]')
     if not view_mode_button:
