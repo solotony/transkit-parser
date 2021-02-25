@@ -58,14 +58,14 @@ def main(args):
             transmissions = shedule['transmissions_list'].split('\n')
             if not len(transmissions):
                 failed('Расписание пусто: {}'.format(r.text))
-            if 'start_at' in shedule:
-                start_at = datetime.strptime(shedule['start_at'], '%H:%M:%S').time()
-            if 'stop_at' in shedule:
-                stop_at = datetime.strptime(shedule['stop_at'], '%H:%M:%S').time()
-            if start_at and start_at > datetime.now().time():
-                logging.info('спим до {}'.format(start_at))
-            while start_at and start_at > datetime.now().time():
-                time.sleep(1)
+#            if 'start_at' in shedule:
+#                start_at = datetime.strptime(shedule['start_at'], '%H:%M:%S').time()
+#            if 'stop_at' in shedule:
+#                stop_at = datetime.strptime(shedule['stop_at'], '%H:%M:%S').time()
+#            if start_at and start_at > datetime.now().time():
+#                logging.info('спим до {}'.format(start_at))
+#            while start_at and start_at > datetime.now().time():
+#                time.sleep(1)
         except Exception as e:
             failed('Ошибка при получения данных с сервера: {}'.format(str(e)))
     else:
@@ -80,14 +80,14 @@ def main(args):
 
     bot = Bot('http://www.transkit.ru/', PROD, DRIVER, PROFILE, HIDDEN)
     if bot.find(id='menuIconAccountActiveArea'):
-        logging.info('  уже залогинены')
+        logging.info('уже залогинены')
     else:
-        logging.info('  надо логиниться')
+        logging.info('надо логиниться')
         process_login(bot)
 
         if PROD:
             if bot.find(id='menuIconAccountActiveArea'):
-                logging.info('  надо логиниться')
+                logging.info('залогинены ОК')
             else:
                 logging.critical('логин ахтунг!!!!!!!!!!!!')
                 exit('логин ахтунг!!!!!!!!!!!!')
@@ -161,8 +161,15 @@ def process_login(bot):
     if not button_link:
         failed('Не могу найти кнопку для открытия формы входа')
 
-    bot.move_to(button_link, 'button_link', scroll=False, randomize=5)
+    bot.move_to(button_link, 'button_link', scroll=True, randomize=5)
     bot.click_at(button_link, 'button_link')
+
+    ha_block_link = bot.find(id='hiddenAuth')
+    if not ha_block_link:
+        failed('Не могу найти hiddenAuth')
+
+    bot.driver.execute_script("arguments[0].style.display = 'block';", ha_block_link)
+    bot.driver.execute_script("arguments[0].style.display = 'none';", button_link)
 
     login_input = bot.find(id='login')
     if not button_link:
@@ -254,7 +261,7 @@ def process_transmission(bot, transmission):
     bot.click_at(view_mode_button, 'view_mode_button')
 
     soup = bot.create_soup()
-    tag_table = soup.find('table', attrs={'id': 'detailstable'})
+    tag_table = soup.find('table', attrs={'id': 'catDetailsTable'})
     if not tag_table:
         logging.error('таблица деталей не найдена')
         return False

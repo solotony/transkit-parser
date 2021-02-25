@@ -95,6 +95,8 @@ class Bot:
         self.driver.execute_script(scroll_nav_out_of_way)
 
     def move_to(self, element, element_name, scroll=False, randomize=0, ybaseoffset=0):
+        logging.debug('move_to')
+        logging.info('move_to')
         self.sleep(2)
         try:
             if scroll:
@@ -116,9 +118,9 @@ class Bot:
                     actions.move_to_element_with_offset(element, x_offset, y_offset+ybaseoffset)
                     actions.pause(random.random()*2)
                     actions.perform()
-                    logging.debug('+({},{})'.format(x_offset, y_offset), end=' ')
+                    logging.debug('+({},{})'.format(x_offset, y_offset))
                 except Exception as e:
-                    logging.debug('x({},{})'.format(x_offset, y_offset), end=' ')
+                    logging.debug('x({},{})'.format(x_offset, y_offset))
         try:
             actions = ActionChains(self.driver)
             actions.move_to_element_with_offset(element, 0, ybaseoffset)
