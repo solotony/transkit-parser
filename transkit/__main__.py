@@ -159,28 +159,28 @@ def process_login(bot):
 
     button_link = bot.find(id='hiddenAuthBut')
     if not button_link:
-        failed('Не могу найти кнопку для открытия формы входа')
-
-    bot.move_to(button_link, 'button_link', scroll=True, randomize=5)
-    bot.click_at(button_link, 'button_link')
+        logging.error('Не могу найти кнопку для открытия формы входа')
+    else:
+        bot.move_to(button_link, 'button_link', scroll=True, randomize=5)
+        bot.click_at(button_link, 'button_link')
 
     ha_block_link = bot.find(id='hiddenAuth')
     if not ha_block_link:
-        failed('Не могу найти hiddenAuth')
-
-    bot.driver.execute_script("arguments[0].style.display = 'block';", ha_block_link)
-    bot.driver.execute_script("arguments[0].style.display = 'none';", button_link)
+        logging.error('Не могу найти hiddenAuth')
+    else:
+        bot.driver.execute_script("arguments[0].style.display = 'block';", ha_block_link)
+        bot.driver.execute_script("arguments[0].style.display = 'none';", button_link)
 
     login_input = bot.find(id='login')
-    if not button_link:
+    if not login_input:
         failed('Не могу найти поле для логина')
 
     password_input = bot.find(name='password')
-    if not button_link:
+    if not password_input:
         failed('Не могу найти поле для пароля')
 
     button_enter = bot.find(xpath='//button[text()="Войти"]')
-    if not button_link:
+    if not button_enter:
         failed('Не могу найти кнопку "войти"')
 
     if PROD:
