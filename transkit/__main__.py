@@ -12,6 +12,7 @@ from .globals import PROD, DRIVER, PROFILE, DELAY_MIN, DELAY_MAX, HIDDEN
 
 LOGIN = 'arttronic' if PROD else 'login'
 PASSWORD = 'ndef53' if PROD else 'password'
+EMAIL_TO_FIND = 'arttronic@'
 
 NUM_COMPARE_MIN = 3
 NUM_COMPARE_MAX = 5 # максимально - 20
@@ -91,6 +92,10 @@ def main(args):
             else:
                 logging.critical('логин ахтунг!!!!!!!!!!!!')
                 exit('логин ахтунг!!!!!!!!!!!!')
+
+    menu_el = bot.find(xpath='//*[contains(text(), "{}")]'.format(EMAIL_TO_FIND))
+    bot.move_to(menu_el, 'menu_el', scroll=True, randomize=5)
+    exit(0)
 
     first = True
     for transmission in transmissions:
