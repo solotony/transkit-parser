@@ -11,7 +11,7 @@ import json
 from .globals import PROD, DRIVER, PROFILE, DELAY_MIN, DELAY_MAX, HIDDEN
 
 LOGIN = 'arttronic' if PROD else 'login'
-PASSWORD = 'ndef53' if PROD else 'password'
+PASSWORD = 'zkut4u' if PROD else 'password'
 
 NUM_COMPARE_MIN = 3
 NUM_COMPARE_MAX = 5 # максимально - 20
