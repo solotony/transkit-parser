@@ -9,7 +9,7 @@ from bs4 import BeautifulSoup
 import time
 import random
 import logging
-from .globals import PROD
+from .globals import PROD, DOWNLOADS
 from pyvirtualdisplay import Display
 
 class Bot:
@@ -36,8 +36,11 @@ class Bot:
             options = Options()
             options.set_preference("browser.download.folderList", 2)
             options.set_preference("browser.download.manager.showWhenStarting", False)
-            options.set_preference("browser.download.dir", "./data")
+            #options.set_preference("browser.download.dir", "data")
+            #options.set_preference("browser.download.defaultFolder", "data")
             options.set_preference("browser.helperApps.neverAsk.saveToDisk", "application/json,text/plain,text/html,*/*")
+            #self.dir1 = options.preferences["browser.download.dir"]
+            #self.dir2 = options.preferences["browser.download.defaultFolder"]
 
             if profile is None:
                 self.driver = webdriver.Firefox(firefox_options=options)

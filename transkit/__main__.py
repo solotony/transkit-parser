@@ -1,5 +1,6 @@
 import random
 import sys
+import os
 from transkit.bot import Bot
 import requests
 import logging
@@ -7,8 +8,11 @@ import pytz
 from datetime import datetime, timezone, tzinfo
 import time
 import json
+import re
 
-from .globals import PROD, DRIVER, PROFILE, DELAY_MIN, DELAY_MAX, HIDDEN
+re_json = re.compile(r'^(\d+)\.json$')
+
+from .globals import PROD, DRIVER, PROFILE, DELAY_MIN, DELAY_MAX, HIDDEN, DOWNLOADS
 
 LOGIN = 'arttronic' if PROD else 'login'
 #PASSWORD = 'ndef53' if PROD else 'password'
@@ -102,13 +106,6 @@ def main(args):
     bot.click_at(kabinet_lnk, 'kabinet_lnk')
     bot.sleep(2)
 
-    #nakl_el = bot.find(xpath='//*[contains(text(), "акладны")]')
-
-    # nakl_el = bot.find(klass='fa fa-exchange fa-fw')
-    # bot.move_to(nakl_el, 'nakl_el', scroll=True, randomize=5)
-    # bot.sleep(2)
-    # bot.click_at(nakl_el, 'nakl_el')
-
     nakl_el2 = bot.find(klass='fa-exchange')
     bot.move_to(nakl_el2, 'nakl_el2', scroll=False, randomize=5)
     bot.sleep(2)
@@ -117,15 +114,30 @@ def main(args):
 
     elements = bot.find_all(klass='dlTD-json')
     if elements:
-        for element in elements:
+        for element in elements[:5]:
             bot.move_to(element, 'element', scroll=False, randomize=1)
             bot.sleep(2)
             bot.click_at(element, 'element')
             bot.sleep(2)
 
-            'http://www.transkit.ru/modules/personal/waybill/json.php?wb=3'
-
-    exit(0)
+    for file in os.listdir(DOWNLOADS):
+        mo = re_json.match(file)
+        if not mo:
+            continue
+        file_path = os.path.join(DOWNLOADS, file)
+        with open(file_path, 'rt', encoding='utf-8') as file:
+            content = file.read()
+            try:
+                content = json.loads(content)
+            except Exception as e:
+                print(mo[1], "Bad json")
+            data = {
+                'name':str(mo[1]),
+                'content': content
+            }
+            response = requests.post('https://mskakpp.ru/api/income/', json=data)
+            print("Uploaded", mo[1], response.status_code)
+        os.unlink(file_path)
 
     first = True
     for transmission in transmissions:
