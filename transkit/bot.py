@@ -31,10 +31,18 @@ class Bot:
         if driver == 'CHROME':
             self.driver = webdriver.Chrome()
         elif driver == 'FF':
+            from selenium.webdriver.firefox.options import Options #noqa
+
+            options = Options()
+            options.set_preference("browser.download.folderList", 2)
+            options.set_preference("browser.download.manager.showWhenStarting", False)
+            options.set_preference("browser.download.dir", "./data")
+            options.set_preference("browser.helperApps.neverAsk.saveToDisk", "application/json,text/plain,text/html,*/*")
+
             if profile is None:
-                self.driver = webdriver.Firefox()
+                self.driver = webdriver.Firefox(firefox_options=options)
             else:
-                self.driver = webdriver.Firefox(profile)
+                self.driver = webdriver.Firefox(profile, firefox_options=options)
         self.driver.maximize_window()
         self.driver.get(self.starturl)
 
@@ -47,14 +55,20 @@ class Bot:
         if self.display is not None:
             self.display.stop()
 
+    def navigate(self, url):
+        self.driver.navigate().to(url)
 
 
-    def find(self, id=None, name=None, xpath=None, link_text=None, link_text_part=None, tag_name=None):
+    def find(self, id=None, name=None, xpath=None, link_text=None, link_text_part=None, tag_name=None, klass=None):
         self.sleep(2)
         try:
             if id:
                 element = self.driver.find_element_by_id(id)
                 logging.debug('find ok element with id="{}"'.format(id))
+                return element
+            if klass:
+                element = self.driver.find_element_by_class_name(klass)
+                logging.debug('find ok element with class="{}"'.format(klass))
                 return element
             if name:
                 element = self.driver.find_element_by_name(name)
@@ -107,7 +121,7 @@ class Bot:
         except Exception as e:
             logging.error('failed to get location of {}: {}'.format(element_name, str(e)))
             return False
-        if randomize:
+        if randomize>1:
             steps = random.randint(2,randomize)
             logging.debug('randomize {} steps {}: '.format(randomize, steps))
             for step in reversed(range(1, steps+1)):
@@ -123,7 +137,7 @@ class Bot:
                     logging.debug('x({},{})'.format(x_offset, y_offset))
         try:
             actions = ActionChains(self.driver)
-            actions.move_to_element_with_offset(element, 0, ybaseoffset)
+            actions.move_to_element_with_offset(element, 1, ybaseoffset+1)
             actions.pause(random.random()*2)
             actions.perform()
             logging.debug('moved to {}'.format(element_name))
@@ -224,3 +238,14 @@ class Bot:
             return False
         link = random.choice(links)
         return self.move_to(link, randomize)
+
+    def find_all(self, *, klass=None):
+        self.sleep(2)
+        try:
+            if klass:
+                elements = self.driver.find_elements_by_class_name(klass)
+                logging.debug('find ok elements with class="{}"'.format(klass))
+                return elements
+        except Exception as e:
+            logging.error('find_element failed: {}'.format(str(e)))
+            return None

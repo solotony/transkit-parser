@@ -11,8 +11,10 @@ import json
 from .globals import PROD, DRIVER, PROFILE, DELAY_MIN, DELAY_MAX, HIDDEN
 
 LOGIN = 'arttronic' if PROD else 'login'
-PASSWORD = 'ndef53' if PROD else 'password'
+#PASSWORD = 'ndef53' if PROD else 'password'
+PASSWORD = 'zkut4u' if PROD else 'password'
 EMAIL_TO_FIND = 'arttronic@'
+
 
 NUM_COMPARE_MIN = 3
 NUM_COMPARE_MAX = 5 # максимально - 20
@@ -95,6 +97,34 @@ def main(args):
 
     menu_el = bot.find(xpath='//*[contains(text(), "{}")]'.format(EMAIL_TO_FIND))
     bot.move_to(menu_el, 'menu_el', scroll=True, randomize=5)
+    bot.sleep(1)
+    kabinet_lnk = bot.find(link_text_part='Ваш кабинет')
+    bot.click_at(kabinet_lnk, 'kabinet_lnk')
+    bot.sleep(2)
+
+    #nakl_el = bot.find(xpath='//*[contains(text(), "акладны")]')
+
+    # nakl_el = bot.find(klass='fa fa-exchange fa-fw')
+    # bot.move_to(nakl_el, 'nakl_el', scroll=True, randomize=5)
+    # bot.sleep(2)
+    # bot.click_at(nakl_el, 'nakl_el')
+
+    nakl_el2 = bot.find(klass='fa-exchange')
+    bot.move_to(nakl_el2, 'nakl_el2', scroll=False, randomize=5)
+    bot.sleep(2)
+    bot.click_at(nakl_el2, 'nakl_el2')
+    bot.sleep(2)
+
+    elements = bot.find_all(klass='dlTD-json')
+    if elements:
+        for element in elements:
+            bot.move_to(element, 'element', scroll=False, randomize=1)
+            bot.sleep(2)
+            bot.click_at(element, 'element')
+            bot.sleep(2)
+
+            'http://www.transkit.ru/modules/personal/waybill/json.php?wb=3'
+
     exit(0)
 
     first = True
