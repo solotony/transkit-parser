@@ -5,10 +5,11 @@ from transkit.bot import Bot
 import requests
 import logging
 import pytz
-from datetime import datetime, timezone, tzinfo
+from datetime import datetime, timezone, tzinfo, timedelta
 import time
 import json
 import re
+from .email import send_notification
 
 re_json = re.compile(r'^(\d+)\.json$')
 
@@ -27,12 +28,9 @@ COMPARE_TRESHOLD = 0.019 # от 0 до 1
 RANDOM_MOVE_TRESHOLD = 0.073 # от 0 до 1
 HEADEROFFSET=-170
 
-local_day = datetime.now().astimezone(tz=pytz.timezone('Europe/Moscow')).strftime('%Y%m%d')
+local_day = datetime.now()  # - timedelta(days=1)
+local_day = local_day.astimezone(tz=pytz.timezone('Europe/Moscow')).strftime('%Y%m%d')
 
-def failed(text):
-    logging.error(text)
-    exit(0)
-    pass
 
 def main(args):
     # set a format which is simpler for console use
@@ -46,42 +44,14 @@ def main(args):
     logging.getLogger().addHandler(console)
 
     if len(args) < 2:
-        failed('формат запуска: python -m transkit shedule|<имя_файла>')
+        logging.error('формат запуска: python -m transkit shedule|<имя_файла>')
+        exit(0)
 
     transmissions = []
     stop_at, start_at = None, None
 
-    if args[1]=='shedule':
-        logging.info('Загружаем расписание')
-        try:
-            ulr = 'https://mskakpp.ru/parsers/transkit-shedule/{}/'.format(local_day)
-            print(ulr)
-            r = requests.get(ulr)
-            if r.status_code!=200:
-                failed('Ошибка получения данных с сервера: {}'.format(r.status_code))
-            shedule = json.loads(r.text)
-            if not 'transmissions_list' in shedule:
-                failed('Расписание пусто: {}'.format(r.text))
-            transmissions = shedule['transmissions_list'].split('\n')
-            if not len(transmissions):
-                failed('Расписание пусто: {}'.format(r.text))
-#            if 'start_at' in shedule:
-#                start_at = datetime.strptime(shedule['start_at'], '%H:%M:%S').time()
-#            if 'stop_at' in shedule:
-#                stop_at = datetime.strptime(shedule['stop_at'], '%H:%M:%S').time()
-#            if start_at and start_at > datetime.now().time():
-#                logging.info('спим до {}'.format(start_at))
-#            while start_at and start_at > datetime.now().time():
-#                time.sleep(1)
-        except Exception as e:
-            failed('Ошибка при получения данных с сервера: {}'.format(str(e)))
-    else:
-        with open(args[1], 'r') as transmissions_file:
-            transmissions = [row.strip() for row in transmissions_file]
-        if not len(transmissions):
-            failed('Расписание пусто: файл={}'.format(args[1]))
+    send_notification('С добрым утром', 'я начинаю')
 
-    logging.info('Начинаем сканирование: {}'.format(transmissions))
     ulr = 'https://mskakpp.ru/parsers/transkit-start/{}/'.format(local_day)
     requests.post(ulr)
 
@@ -97,47 +67,35 @@ def main(args):
                 logging.info('залогинены ОК')
             else:
                 logging.critical('логин ахтунг!!!!!!!!!!!!')
-                exit('логин ахтунг!!!!!!!!!!!!')
+                bot.failed('логин ахтунг!!!!!!!!!!!!')
 
-    menu_el = bot.find(xpath='//*[contains(text(), "{}")]'.format(EMAIL_TO_FIND))
-    bot.move_to(menu_el, 'menu_el', scroll=True, randomize=5)
-    bot.sleep(1)
-    kabinet_lnk = bot.find(link_text_part='Ваш кабинет')
-    bot.click_at(kabinet_lnk, 'kabinet_lnk')
-    bot.sleep(2)
+    process_downloads(bot)
 
-    nakl_el2 = bot.find(klass='fa-exchange')
-    bot.move_to(nakl_el2, 'nakl_el2', scroll=False, randomize=5)
-    bot.sleep(2)
-    bot.click_at(nakl_el2, 'nakl_el2')
-    bot.sleep(2)
+    if args[1] == 'shedule':
+        logging.info('Загружаем расписание')
+        try:
+            ulr = 'https://mskakpp.ru/parsers/transkit-shedule/{}/'.format(local_day)
+            print(ulr)
+            r = requests.get(ulr)
+            if r.status_code != 200:
+                bot.failed('Ошибка получения данных с сервера: {}'.format(r.status_code))
+            shedule = json.loads(r.text)
+            if not 'transmissions_list' in shedule:
+                bot.failed('Расписание пусто: {}'.format(r.text))
+            transmissions = shedule['transmissions_list'].split('\n')
+            if not len(transmissions):
+                bot.failed('Расписание пусто: {}'.format(r.text))
 
-    elements = bot.find_all(klass='dlTD-json')
-    if elements:
-        for element in elements[:5]:
-            bot.move_to(element, 'element', scroll=False, randomize=1)
-            bot.sleep(2)
-            bot.click_at(element, 'element')
-            bot.sleep(2)
+        except Exception as e:
+            bot.failed('Ошибка при получения данных с сервера: {}'.format(str(e)))
+    else:
+        with open(args[1], 'r') as transmissions_file:
+            transmissions = [row.strip() for row in transmissions_file]
+        if not len(transmissions):
+            bot.failed('Расписание пусто: файл={}'.format(args[1]))
 
-    for file in os.listdir(DOWNLOADS):
-        mo = re_json.match(file)
-        if not mo:
-            continue
-        file_path = os.path.join(DOWNLOADS, file)
-        with open(file_path, 'rt', encoding='utf-8') as file:
-            content = file.read()
-            try:
-                content = json.loads(content)
-            except Exception as e:
-                print(mo[1], "Bad json")
-            data = {
-                'name':str(mo[1]),
-                'content': content
-            }
-            response = requests.post('https://mskakpp.ru/api/income/', json=data)
-            print("Uploaded", mo[1], response.status_code)
-        os.unlink(file_path)
+    logging.info('Начинаем сканирование: {}'.format(transmissions))
+    send_notification('Начинаем сканирование', str(transmissions))
 
     first = True
     for transmission in transmissions:
@@ -158,6 +116,7 @@ def main(args):
 
     logging.info('завершено сканирование')
     requests.post('https://mskakpp.ru/parsers/transkit-stop/{}/'.format(local_day))
+    bot.quit()
 
 def do_compare(bot):
     logging.info('Выполняется сравнение')
@@ -220,15 +179,15 @@ def process_login(bot):
 
     login_input = bot.find(id='login')
     if not login_input:
-        failed('Не могу найти поле для логина')
+        bot.failed('Не могу найти поле для логина')
 
     password_input = bot.find(name='password')
     if not password_input:
-        failed('Не могу найти поле для пароля')
+        bot.failed('Не могу найти поле для пароля')
 
     button_enter = bot.find(xpath='//button[text()="Войти"]')
     if not button_enter:
-        failed('Не могу найти кнопку "войти"')
+        bot.failed('Не могу найти кнопку "войти"')
 
     if PROD:
         logging.info('do login')
@@ -264,7 +223,7 @@ def process_transmission(bot, transmission):
 
     search_input = bot.find(id='dsch')
     if not search_input:
-        failed('Не могу найти поле поиска')
+        bot.failed('Не могу найти поле поиска')
 
     search_button = None
 
@@ -275,7 +234,7 @@ def process_transmission(bot, transmission):
 
     if not search_button:
         logging.critical('Не могу кнопку поиска')
-        failed('Не могу кнопку поиска')
+        bot.failed('Не могу кнопку поиска')
 
     bot.move_to(search_input, 'search_input', scroll=False, randomize=5)
     search_input.clear()
@@ -424,6 +383,48 @@ def process_transmission(bot, transmission):
         do_compare(bot)
 
     return True
+
+def process_downloads(bot):
+    menu_el = bot.find(xpath='//*[contains(text(), "{}")]'.format(EMAIL_TO_FIND))
+    bot.move_to(menu_el, 'menu_el', scroll=True, randomize=5)
+    bot.sleep(1)
+    kabinet_lnk = bot.find(link_text_part='Ваш кабинет')
+    bot.click_at(kabinet_lnk, 'kabinet_lnk')
+    bot.sleep(2)
+
+    nakl_el2 = bot.find(klass='fa-exchange')
+    bot.move_to(nakl_el2, 'nakl_el2', scroll=False, randomize=5)
+    bot.sleep(2)
+    bot.click_at(nakl_el2, 'nakl_el2')
+    bot.sleep(2)
+
+    elements = bot.find_all(klass='dlTD-json')
+    if elements:
+        for element in elements[:5]:
+            bot.move_to(element, 'element', scroll=False, randomize=1)
+            bot.sleep(2)
+            bot.click_at(element, 'element')
+            bot.sleep(2)
+
+    for file in os.listdir(DOWNLOADS):
+        mo = re_json.match(file)
+        if not mo:
+            continue
+        file_path = os.path.join(DOWNLOADS, file)
+        with open(file_path, 'rt', encoding='utf-8') as file:
+            content = file.read()
+            try:
+                content = json.loads(content)
+            except Exception as e:
+                print(mo[1], "Bad json")
+            data = {
+                'name':    str(mo[1]),
+                'content': content
+            }
+            response = requests.post('https://mskakpp.ru/api/income/', json=data)
+            print("Uploaded", mo[1], response.status_code)
+        os.unlink(file_path)
+
 
 if __name__ == '__main__':
     main(sys.argv)

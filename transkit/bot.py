@@ -11,6 +11,7 @@ import random
 import logging
 from .globals import PROD, DOWNLOADS
 from pyvirtualdisplay import Display
+from .email import send_notification
 
 class Bot:
 
@@ -49,10 +50,8 @@ class Bot:
         self.driver.maximize_window()
         self.driver.get(self.starturl)
 
-
     def getstart(self):
         self.driver.get(self.starturl)
-
 
     def __del__(self):
         if self.display is not None:
@@ -60,7 +59,6 @@ class Bot:
 
     def navigate(self, url):
         self.driver.navigate().to(url)
-
 
     def find(self, id=None, name=None, xpath=None, link_text=None, link_text_part=None, tag_name=None, klass=None):
         self.sleep(2)
@@ -195,8 +193,6 @@ class Bot:
             logging.error('failed to click at {}: {}'.format(element_name, str(e)))
             return False
 
-
-
     def send_keys_to(self, element, element_name, keys):
         self.sleep(2)
         try:
@@ -209,7 +205,6 @@ class Bot:
 
     def send_keys_to_body(self, keys):
        return self.send_keys_to(self.driver.find_element_by_tag_name('body'), 'body', keys)
-
 
     def create_soup(self, element=None, element_name=None):
         if element:
@@ -234,7 +229,6 @@ class Bot:
     def back(self):
         self.driver.back()
 
-
     def move_to_random(self, randomize=5):
         links = self.driver.find_elements_by_tag_name('a')
         if not links or not len(links):
@@ -252,3 +246,15 @@ class Bot:
         except Exception as e:
             logging.error('find_element failed: {}'.format(str(e)))
             return None
+
+    def quit(self):
+        self.driver.quit()
+
+    def close(self):
+        self.driver.close()
+
+    def failed(self, message):
+        send_notification('Возникли проблемы', message)
+        logging.error(message)
+        self.quit()
+        exit(0)
