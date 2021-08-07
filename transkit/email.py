@@ -4,11 +4,8 @@ import logging
 def send_notification(subject, body):
     sender = 'akpp@mskakpp.ru'
     recipient = 'akpp@mskakpp.ru'
-    sender_password = "Mes22HeR03"
+    sender_password = "Ali22na03"
 
-    sender = 'robot@solotony.com'
-    recipient = 'as@solotony.com'
-    sender_password = "5T5GeMbcfdk5TIEbixSo"
 
     try:
         mail_lib = smtplib.SMTP_SSL('smtp.yandex.ru', 465)
